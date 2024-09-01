@@ -22,13 +22,8 @@ repositories {
 }
 
 dependencies {
-    testImplementation("org.junit.platform:junit-platform-launcher") // used to be runtimeOnly
-    // Logging
-    implementation("org.slf4j:slf4j-api:2.0.16")
-    testImplementation("ch.qos.logback:logback-access:1.4.14")
-    testImplementation("ch.qos.logback:logback-classic:1.4.14")
-    testImplementation("ch.qos.logback:logback-core:1.4.14")
-}
+
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")}
 
 java {
     toolchain {
@@ -41,10 +36,12 @@ java {
 tasks.named<Test>("test") {
     useJUnitPlatform()
 }
+
 // Ensure we have lint warnings displayed so we can fix or  @SuppressWarnings("unchecked")
 tasks.withType<JavaCompile>().configureEach {
     options.compilerArgs.add("-Xlint:unchecked")
 }
+
 tasks.javadoc {
     if (JavaVersion.current().isJava9Compatible) {
         (options as StandardJavadocDocletOptions).addBooleanOption("html5", true)

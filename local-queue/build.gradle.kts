@@ -11,15 +11,34 @@ plugins {
 }
 
 dependencies {
-    // Use JUnit Jupiter for testing.
-    testImplementation(libs.junit.jupiter)
+    implementation (libs.guava) // for hashing
+    implementation(libs.dropwizard4.core)
+    api(libs.micrometer.core)
+    implementation(libs.bundles.logging)
+    // SQL
+    implementation(libs.jdbi.core)
+    implementation(libs.jdbi.testing)
+    implementation(libs.jdbi.sqlobject)
 
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    implementation(libs.javax.inject)
+    implementation(libs.dagger)
+    annotationProcessor(libs.dagger.compiler)
+    implementation(libs.immutables.annotations)
+    annotationProcessor(libs.immutables.value)
 
-    // This dependency is exported to consumers, that is to say found on their compile classpath.
-    api(libs.commons.math3)
+    implementation(libs.codehead.metrics)
+    implementation(libs.codehead.metrics.micrometer)
 
-    // This dependency is used internally, and not exposed to consumers on their own compile classpath.
-    implementation(libs.guava)
+    implementation(libs.liquibase.core)
+
+
+    testImplementation(libs.bundles.logback)
+    testImplementation(libs.hsqldb)
+    testImplementation(libs.c3p0)
+    testImplementation(libs.bundles.testing)
+    testImplementation(libs.codehead.test)
+    testImplementation(libs.codehead.metrics.test)
+    testAnnotationProcessor(libs.dagger.compiler)
+    testAnnotationProcessor(libs.immutables.value)
 }
 
