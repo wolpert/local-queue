@@ -1,3 +1,8 @@
+# Redux
+
+This project is almost a redo of the local-queue module within the svarm project.
+The idea here is rather than just have a cheap-database 
+
 # Local Queue
 
 The queue provides for a durable local queue usable by the process itself. It
