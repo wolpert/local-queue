@@ -84,8 +84,14 @@ public class QueueProcessor implements Managed {
    */
   public void processPendingQueue() {
     LOGGER.trace("processPendingQueue()");
+    final int messageCount = messageConsumerExecutor.availableThreadCount();
+    metrics.increment("QueueProcessor.processPendingQueue.availableThreads", messageCount);
+    if (messageCount < 1) {
+      LOGGER.trace("No threads available to process messages: {}", messageCount);
+      return;
+    }
     metrics.time("QueueProcessor.processPendingQueue", () -> {
-      dao.forState(State.PENDING).forEach(message -> {
+      dao.forState(State.PENDING, messageCount).forEach(message -> {
         LOGGER.trace("Processing message {}", message);
         dao.updateState(message, State.ACTIVATING);
         messageConsumerExecutor.enqueue(message);

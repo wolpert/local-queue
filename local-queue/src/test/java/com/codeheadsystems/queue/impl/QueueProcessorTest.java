@@ -4,6 +4,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import com.codeheadsystems.metrics.test.BaseMetricTest;
@@ -59,12 +61,23 @@ class QueueProcessorTest extends BaseMetricTest {
 
   @Test
   void testProcessingPendingQueue() {
-    when(messageDao.forState(State.PENDING)).thenReturn(List.of(message));
+    when(messageConsumerExecutor.availableThreadCount()).thenReturn(1);
+    when(messageDao.forState(State.PENDING,1)).thenReturn(List.of(message));
 
     processor.processPendingQueue();
 
     verify(messageDao, times(1)).updateState(message, State.ACTIVATING);
     verify(messageConsumerExecutor, times(1)).enqueue(message);
+  }
+
+  @Test
+  void testProcessingPendingQueue_noActiveThreads() {
+    when(messageConsumerExecutor.availableThreadCount()).thenReturn(0);
+
+    processor.processPendingQueue();
+    
+    verifyNoInteractions(messageDao);
+    verifyNoMoreInteractions(messageConsumerExecutor);
   }
 
 }

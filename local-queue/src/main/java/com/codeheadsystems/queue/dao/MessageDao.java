@@ -52,6 +52,14 @@ public interface MessageDao {
   @SqlQuery("select * from QUEUE where STATE = :state order by TIMESTAMP asc")
   List<Message> forState(@Bind("state") final State state);
 
+  /**
+   * For state list, but limit to the number requested.
+   *
+   * @param state the state
+   * @return the list
+   */
+  @SqlQuery("select * from QUEUE where STATE = :state order by TIMESTAMP asc limit :limit")
+  List<Message> forState(@Bind("state") final State state, @Bind("limit") final int limit);
 
   /**
    * Update state.

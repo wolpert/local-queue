@@ -39,3 +39,21 @@ distributed fashion.
 
 The queue processor converts all Activating and Processing messages to Pending.
 Then during the normal cycle, will start processing the active messages.
+
+## Updates
+
+The following is a set of tasks to update the local queue to increase reliability
+and 'controlled performance'... meaning you can dial up how much time to spend oo
+different queue tasks, how many workers, etc. This control is intended to be 
+dynamic so in a live system you can ratchet it down as needed. 
+
+### Requirements
+* Processor to handle new task execution.
+* Default executor with limit number of threads to work against.
+* Ability to define an executor per message type.
+* Ability to change the executor requirements while running.
+* Changes can be persisted so they retain on start-up.
+  * Default values are in configuration files.
+  * Overrides are in the database.
+* New module/library so you can view/modify these settings via JMX.
+* Enable/Disable accepting of tasks

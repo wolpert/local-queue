@@ -8,7 +8,6 @@ import dagger.multibindings.IntoSet;
 import dagger.multibindings.Multibinds;
 import io.dropwizard.lifecycle.Managed;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
@@ -96,7 +95,7 @@ public class QueueModule {
   @Singleton
   @Provides
   @Named(QUEUE_PROCESSOR_EXECUTOR)
-  public ExecutorService threadPoolExecutor(final QueueConfigurationFactory factory) {
+  public ThreadPoolExecutor threadPoolExecutor(final QueueConfigurationFactory factory) {
     final QueueConfiguration configuration = factory.queueConfiguration();
     return new ThreadPoolExecutor(configuration.queueExecutorMinThreads(),
         configuration.queueExecutorMaxThreads(),

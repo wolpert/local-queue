@@ -6,6 +6,7 @@ import com.codeheadsystems.metrics.Metrics;
 import com.codeheadsystems.metrics.Tags;
 import io.dropwizard.lifecycle.Managed;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -24,7 +25,7 @@ import com.codeheadsystems.queue.dao.MessageDao;
 public class MessageConsumerExecutor implements Managed {
   private static final Logger LOGGER = LoggerFactory.getLogger(MessageConsumerExecutor.class);
 
-  private final ExecutorService executorService;
+  private final ThreadPoolExecutor executorService;
   private final MessageDao messageDao;
   private final QueueRegister queueRegister;
   private final Metrics metrics;
@@ -38,7 +39,7 @@ public class MessageConsumerExecutor implements Managed {
    * @param metrics         the metrics
    */
   @Inject
-  public MessageConsumerExecutor(@Named(QUEUE_PROCESSOR_EXECUTOR) final ExecutorService executorService,
+  public MessageConsumerExecutor(@Named(QUEUE_PROCESSOR_EXECUTOR) final ThreadPoolExecutor executorService,
                                  final MessageDao messageDao,
                                  final QueueRegister queueRegister,
                                  final Metrics metrics) {
@@ -47,6 +48,10 @@ public class MessageConsumerExecutor implements Managed {
     this.queueRegister = queueRegister;
     this.metrics = metrics;
     LOGGER.info("MessageConsumerExecutor({},{},{})", messageDao, executorService, queueRegister);
+  }
+
+  public int availableThreadCount() {
+    return executorService.getMaximumPoolSize() - executorService.getActiveCount();
   }
 
   /**

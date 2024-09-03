@@ -119,6 +119,27 @@ class MessageDaoTest {
         .containsExactly(message1, message3);
   }
 
+  @Test
+  void testListByStateWithLimit() {
+    when(clock.instant()).thenReturn(Instant.ofEpochMilli(100));
+    final Message message1 = messageFactory.createMessage("type", "payload:1");
+    when(clock.instant()).thenReturn(Instant.ofEpochMilli(110));
+    final Message message2 = messageFactory.createMessage("type", "payload:2");
+    when(clock.instant()).thenReturn(Instant.ofEpochMilli(120));
+    final Message message3 = messageFactory.createMessage("type", "payload:3");
+    messageDao.store(message1, State.ACTIVATING);
+    messageDao.store(message2, State.PENDING);
+    messageDao.store(message3, State.ACTIVATING);
+    final List<Message> list = messageDao.forState(State.ACTIVATING, 1);
+    assertThat(list)
+        .hasSize(1)
+        .containsExactly(message1);
+    final List<Message> list2 = messageDao.forState(State.ACTIVATING, 3);
+    assertThat(list2)
+        .hasSize(2)
+        .containsExactly(message1, message3);
+  }
+
   @BeforeEach
   void setup() throws SQLException {
     messageFactory = new MessageFactory(clock);
