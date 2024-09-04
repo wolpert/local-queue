@@ -3,6 +3,10 @@ package com.codeheadsystems.queue.impl;
 import static com.codeheadsystems.queue.module.QueueModule.QUEUE_PROCESSOR_SCHEDULER;
 
 import com.codeheadsystems.metrics.Metrics;
+import com.codeheadsystems.queue.QueueConfiguration;
+import com.codeheadsystems.queue.State;
+import com.codeheadsystems.queue.factory.QueueConfigurationFactory;
+import com.codeheadsystems.queue.manager.MessageManager;
 import io.dropwizard.lifecycle.Managed;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -12,10 +16,6 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.codeheadsystems.queue.QueueConfiguration;
-import com.codeheadsystems.queue.State;
-import com.codeheadsystems.queue.dao.MessageDao;
-import com.codeheadsystems.queue.factory.QueueConfigurationFactory;
 
 /**
  * The Queue Processor. Reads the queues and creates workers for the messages.
@@ -24,7 +24,7 @@ import com.codeheadsystems.queue.factory.QueueConfigurationFactory;
 public class QueueProcessor implements Managed {
   private static final Logger LOGGER = LoggerFactory.getLogger(QueueProcessor.class);
 
-  private final MessageDao dao;
+  private final MessageManager messageManager;
   private final QueueConfiguration queueConfiguration;
   private final MessageConsumerExecutor messageConsumerExecutor;
   private final ScheduledExecutorService scheduledExecutorService;
@@ -34,24 +34,24 @@ public class QueueProcessor implements Managed {
   /**
    * Instantiates a new Queue processor.
    *
-   * @param dao                       the dao
+   * @param messageManager            the messageManager
    * @param queueConfigurationFactory the queue configuration factory
    * @param messageConsumerExecutor   the message consumer executor
    * @param scheduledExecutorService  the scheduled executor service
    * @param metrics                   the metrics
    */
   @Inject
-  public QueueProcessor(final MessageDao dao,
+  public QueueProcessor(final MessageManager messageManager,
                         final QueueConfigurationFactory queueConfigurationFactory,
                         final MessageConsumerExecutor messageConsumerExecutor,
                         @Named(QUEUE_PROCESSOR_SCHEDULER) final ScheduledExecutorService scheduledExecutorService,
                         final Metrics metrics) {
-    this.dao = dao;
+    this.messageManager = messageManager;
     this.queueConfiguration = queueConfigurationFactory.queueConfiguration();
     this.messageConsumerExecutor = messageConsumerExecutor;
     this.scheduledExecutorService = scheduledExecutorService;
     this.metrics = metrics;
-    LOGGER.info("QueueProcessor({},{},{})", dao, queueConfiguration, messageConsumerExecutor);
+    LOGGER.info("QueueProcessor({},{},{})", messageManager, queueConfiguration, messageConsumerExecutor);
   }
 
   @Override
@@ -60,8 +60,7 @@ public class QueueProcessor implements Managed {
     synchronized (scheduledExecutorService) {
       if (scheduler == null) {
         LOGGER.info("Resetting existing messages to pending state");
-        resetState(State.ACTIVATING);
-        resetState(State.PROCESSING);
+        messageManager.setAllToPending();
         LOGGER.info("Starting the scheduler");
         scheduler = scheduledExecutorService.scheduleAtFixedRate(this::processPendingQueue,
             queueConfiguration.queueProcessorInitialDelay(),
@@ -70,13 +69,6 @@ public class QueueProcessor implements Managed {
       }
     }
     LOGGER.info("Queue accepting messages");
-  }
-
-  private void resetState(final State state) {
-    dao.forState(state).forEach(message -> {
-      LOGGER.info("Resetting {} message to PENDING: {}", state, message);
-      dao.updateState(message, State.PENDING);
-    });
   }
 
   /**
@@ -91,9 +83,9 @@ public class QueueProcessor implements Managed {
       return;
     }
     metrics.time("QueueProcessor.processPendingQueue", () -> {
-      dao.forState(State.PENDING, messageCount).forEach(message -> {
+      messageManager.forState(State.PENDING, messageCount).forEach(message -> {
         LOGGER.trace("Processing message {}", message);
-        dao.updateState(message, State.ACTIVATING);
+        messageManager.setActivating(message);
         messageConsumerExecutor.enqueue(message);
       });
       return null;

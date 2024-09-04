@@ -1,5 +1,14 @@
 package com.codeheadsystems.queue.module;
 
+import com.codeheadsystems.queue.Message;
+import com.codeheadsystems.queue.MessageConsumer;
+import com.codeheadsystems.queue.Queue;
+import com.codeheadsystems.queue.QueueConfiguration;
+import com.codeheadsystems.queue.dao.MessageDao;
+import com.codeheadsystems.queue.factory.QueueConfigurationFactory;
+import com.codeheadsystems.queue.impl.MessageConsumerExecutor;
+import com.codeheadsystems.queue.impl.QueueImpl;
+import com.codeheadsystems.queue.impl.QueueProcessor;
 import dagger.Binds;
 import dagger.BindsOptionalOf;
 import dagger.Module;
@@ -17,15 +26,6 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.mapper.immutables.JdbiImmutables;
-import com.codeheadsystems.queue.Message;
-import com.codeheadsystems.queue.MessageConsumer;
-import com.codeheadsystems.queue.Queue;
-import com.codeheadsystems.queue.QueueConfiguration;
-import com.codeheadsystems.queue.dao.MessageDao;
-import com.codeheadsystems.queue.factory.QueueConfigurationFactory;
-import com.codeheadsystems.queue.impl.MessageConsumerExecutor;
-import com.codeheadsystems.queue.impl.QueueImpl;
-import com.codeheadsystems.queue.impl.QueueProcessor;
 
 /**
  * The type Queue module.

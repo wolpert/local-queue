@@ -1,5 +1,6 @@
 package com.codeheadsystems.queue.impl;
 
+import com.codeheadsystems.queue.MessageConsumer;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -8,7 +9,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.codeheadsystems.queue.MessageConsumer;
 
 /**
  * The type Queue register.

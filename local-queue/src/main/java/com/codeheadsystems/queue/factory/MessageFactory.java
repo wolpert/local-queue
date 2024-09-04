@@ -1,5 +1,7 @@
 package com.codeheadsystems.queue.factory;
 
+import com.codeheadsystems.queue.ImmutableMessage;
+import com.codeheadsystems.queue.Message;
 import com.google.common.base.Charsets;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
@@ -8,8 +10,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.codeheadsystems.queue.ImmutableMessage;
-import com.codeheadsystems.queue.Message;
 
 /**
  * The type Message factory.

@@ -1,10 +1,10 @@
 package com.codeheadsystems.queue.factory;
 
+import com.codeheadsystems.queue.ImmutableQueueConfiguration;
+import com.codeheadsystems.queue.QueueConfiguration;
 import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import com.codeheadsystems.queue.ImmutableQueueConfiguration;
-import com.codeheadsystems.queue.QueueConfiguration;
 
 /**
  * Not really a factory. Just a way to get the configuration from the optional.

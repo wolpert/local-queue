@@ -1,13 +1,13 @@
 package com.codeheadsystems.queue.dao;
 
+import com.codeheadsystems.queue.Message;
+import com.codeheadsystems.queue.State;
 import java.util.List;
 import java.util.Optional;
 import org.jdbi.v3.sqlobject.customizer.Bind;
 import org.jdbi.v3.sqlobject.customizer.BindPojo;
 import org.jdbi.v3.sqlobject.statement.SqlQuery;
 import org.jdbi.v3.sqlobject.statement.SqlUpdate;
-import com.codeheadsystems.queue.Message;
-import com.codeheadsystems.queue.State;
 
 /**
  * The interface Message dao.
@@ -21,8 +21,7 @@ public interface MessageDao {
    * @param state   the state
    */
   @SqlUpdate("insert into QUEUE (HASH, TIMESTAMP, MESSAGE_TYPE, PAYLOAD, STATE) "
-      + "values "
-      + "(:hash, :timestamp, :messageType, :payload, :state)")
+      + "values (:hash, :timestamp, :messageType, :payload, :state)")
   void store(@BindPojo final Message message, @Bind("state") final State state);
 
   /**
@@ -70,6 +69,14 @@ public interface MessageDao {
    */
   @SqlUpdate("update QUEUE set STATE = :state where HASH = :hash")
   void updateState(@BindPojo final Message message, @Bind("state") final State state);
+
+  /**
+   * Update state.
+   *
+   * @param state the state
+   */
+  @SqlUpdate("update QUEUE set STATE = :state")
+  void updateAllToState(@Bind("state") final State state);
 
   /**
    * Delete.

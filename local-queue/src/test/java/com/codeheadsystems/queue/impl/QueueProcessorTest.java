@@ -9,6 +9,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import com.codeheadsystems.metrics.test.BaseMetricTest;
+import com.codeheadsystems.queue.manager.MessageManager;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ScheduledExecutorService;
@@ -28,7 +29,7 @@ import com.codeheadsystems.queue.factory.QueueConfigurationFactory;
 @ExtendWith(MockitoExtension.class)
 class QueueProcessorTest extends BaseMetricTest {
 
-  @Mock private MessageDao messageDao;
+  @Mock private MessageManager messageManager;
   @Mock private QueueConfiguration queueConfiguration;
   @Mock private MessageConsumerExecutor messageConsumerExecutor;
   @Mock private ScheduledExecutorService scheduledExecutorService;
@@ -40,14 +41,12 @@ class QueueProcessorTest extends BaseMetricTest {
 
   @BeforeEach
   void setup() {
-    processor = new QueueProcessor(messageDao, new QueueConfigurationFactory(Optional.of(queueConfiguration)), messageConsumerExecutor, scheduledExecutorService, metricsFactory);
+    processor = new QueueProcessor(messageManager, new QueueConfigurationFactory(Optional.of(queueConfiguration)), messageConsumerExecutor, scheduledExecutorService, metricsFactory);
   }
 
   @SuppressWarnings("unchecked")
   @Test
   void testStart() {
-    when(messageDao.forState(State.ACTIVATING)).thenReturn(List.of(message));
-    when(messageDao.forState(State.PROCESSING)).thenReturn(List.of());
     when(queueConfiguration.queueProcessorInitialDelay()).thenReturn(1);
     when(queueConfiguration.queueProcessorInterval()).thenReturn(0);
     when(scheduledExecutorService.scheduleAtFixedRate(any(), eq(1L), eq(0L), eq(TimeUnit.SECONDS)))
@@ -56,17 +55,17 @@ class QueueProcessorTest extends BaseMetricTest {
     processor.start();
     processor.start();
 
-    verify(messageDao, times(1)).updateState(message, State.PENDING);
+    verify(messageManager, times(1)).setAllToPending();
   }
 
   @Test
   void testProcessingPendingQueue() {
     when(messageConsumerExecutor.availableThreadCount()).thenReturn(1);
-    when(messageDao.forState(State.PENDING,1)).thenReturn(List.of(message));
+    when(messageManager.forState(State.PENDING,1)).thenReturn(List.of(message));
 
     processor.processPendingQueue();
 
-    verify(messageDao, times(1)).updateState(message, State.ACTIVATING);
+    verify(messageManager, times(1)).setActivating(message);
     verify(messageConsumerExecutor, times(1)).enqueue(message);
   }
 
@@ -76,7 +75,7 @@ class QueueProcessorTest extends BaseMetricTest {
 
     processor.processPendingQueue();
 
-    verifyNoInteractions(messageDao);
+    verifyNoInteractions(messageManager);
     verifyNoMoreInteractions(messageConsumerExecutor);
   }
 

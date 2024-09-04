@@ -4,8 +4,10 @@ import static com.codeheadsystems.queue.module.QueueModule.QUEUE_PROCESSOR_EXECU
 
 import com.codeheadsystems.metrics.Metrics;
 import com.codeheadsystems.metrics.Tags;
+import com.codeheadsystems.queue.Message;
+import com.codeheadsystems.queue.MessageConsumer;
+import com.codeheadsystems.queue.manager.MessageManager;
 import io.dropwizard.lifecycle.Managed;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
@@ -13,10 +15,6 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.codeheadsystems.queue.Message;
-import com.codeheadsystems.queue.MessageConsumer;
-import com.codeheadsystems.queue.State;
-import com.codeheadsystems.queue.dao.MessageDao;
 
 /**
  * The type Message consumer executor.
@@ -26,7 +24,7 @@ public class MessageConsumerExecutor implements Managed {
   private static final Logger LOGGER = LoggerFactory.getLogger(MessageConsumerExecutor.class);
 
   private final ThreadPoolExecutor executorService;
-  private final MessageDao messageDao;
+  private final MessageManager messageManager;
   private final QueueRegister queueRegister;
   private final Metrics metrics;
 
@@ -34,20 +32,20 @@ public class MessageConsumerExecutor implements Managed {
    * Instantiates a new Message consumer executor.
    *
    * @param executorService the executor service
-   * @param messageDao      the message dao
+   * @param messageManager  the message manager
    * @param queueRegister   the queue register
    * @param metrics         the metrics
    */
   @Inject
   public MessageConsumerExecutor(@Named(QUEUE_PROCESSOR_EXECUTOR) final ThreadPoolExecutor executorService,
-                                 final MessageDao messageDao,
+                                 final MessageManager messageManager,
                                  final QueueRegister queueRegister,
                                  final Metrics metrics) {
     this.executorService = executorService;
-    this.messageDao = messageDao;
+    this.messageManager = messageManager;
     this.queueRegister = queueRegister;
     this.metrics = metrics;
-    LOGGER.info("MessageConsumerExecutor({},{},{})", messageDao, executorService, queueRegister);
+    LOGGER.info("MessageConsumerExecutor({},{},{})", messageManager, executorService, queueRegister);
   }
 
   /**
@@ -73,7 +71,7 @@ public class MessageConsumerExecutor implements Managed {
               messageConsumer -> executorService.execute(() -> execute(message, messageConsumer)),
               () -> {
                 LOGGER.error("No message for type {}", message.messageType());
-                messageDao.delete(message);
+                messageManager.clear(message);
               });
       return null;
     });
@@ -83,7 +81,7 @@ public class MessageConsumerExecutor implements Managed {
     LOGGER.trace("execute({},{})", message, consumer);
     try {
       metrics.time("MessageConsumerExecutor.execute", Tags.of("messageType", message.messageType()), () -> {
-        messageDao.updateState(message, State.PROCESSING);
+        messageManager.setProcessing(message);
         consumer.accept(message);
         return null;
       });
@@ -91,7 +89,7 @@ public class MessageConsumerExecutor implements Managed {
       // TODO: There is no dead letter queue... yet
       LOGGER.error("Error processing message: {}", message, t); // do not die
     } finally {
-      messageDao.delete(message);
+      messageManager.clear(message);
     }
   }
 

@@ -2,11 +2,15 @@ package com.codeheadsystems.queue.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.codeheadsystems.metrics.test.BaseMetricTest;
+import com.codeheadsystems.queue.Message;
+import com.codeheadsystems.queue.QueueConfiguration;
+import com.codeheadsystems.queue.State;
+import com.codeheadsystems.queue.factory.QueueConfigurationFactory;
+import com.codeheadsystems.queue.manager.MessageManager;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.Optional;
 import org.jdbi.v3.core.statement.UnableToExecuteStatementException;
@@ -15,12 +19,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import com.codeheadsystems.queue.Message;
-import com.codeheadsystems.queue.QueueConfiguration;
-import com.codeheadsystems.queue.State;
-import com.codeheadsystems.queue.dao.MessageDao;
-import com.codeheadsystems.queue.factory.MessageFactory;
-import com.codeheadsystems.queue.factory.QueueConfigurationFactory;
 
 @ExtendWith(MockitoExtension.class)
 class QueueImplTest extends BaseMetricTest {
@@ -29,8 +27,7 @@ class QueueImplTest extends BaseMetricTest {
   private static final String PAYLOAD = "payload";
   private static final String UUID = "uuid";
   private static final String HASH = "hash";
-  @Mock private MessageDao messageDao;
-  @Mock private MessageFactory messageFactory;
+  @Mock private MessageManager messageManager;
   @Mock private QueueConfiguration queueConfiguration;
 
   @Mock private Message message;
@@ -42,25 +39,22 @@ class QueueImplTest extends BaseMetricTest {
 
   @BeforeEach
   public void setup() {
-    queue = new QueueImpl(messageDao, messageFactory, new QueueConfigurationFactory(Optional.of(queueConfiguration)), metricsFactory);
+    queue = new QueueImpl(messageManager, new QueueConfigurationFactory(Optional.of(queueConfiguration)), metricsFactory);
   }
 
   @Test
   void enqueue() {
-    when(messageFactory.createMessage(TYPE, PAYLOAD)).thenReturn(message);
+    when(messageManager.saveMessage(TYPE, PAYLOAD)).thenReturn(Optional.of(message));
 
     assertThat(queue.enqueue(TYPE, PAYLOAD))
         .isNotEmpty()
         .contains(message);
-
-    verify(messageDao).store(message, State.PENDING);
   }
 
   @Test
   void enqueue_failureToSaveMessage_configDisablesException() {
     when(queueConfiguration.exceptionOnEnqueueFail()).thenReturn(false);
-    when(messageFactory.createMessage(TYPE, PAYLOAD)).thenReturn(message);
-    doThrow(unableToExecuteStatementException).when(messageDao).store(message, State.PENDING); // not dup
+    when(messageManager.saveMessage(TYPE, PAYLOAD)).thenThrow(unableToExecuteStatementException); // not dup
 
     assertThat(queue.enqueue(TYPE, PAYLOAD))
         .isEmpty();
@@ -69,53 +63,27 @@ class QueueImplTest extends BaseMetricTest {
   @Test
   void enqueue_failureToSaveMessage_configEnablesException() {
     when(queueConfiguration.exceptionOnEnqueueFail()).thenReturn(true);
-    when(messageFactory.createMessage(TYPE, PAYLOAD)).thenReturn(message);
-    doThrow(unableToExecuteStatementException).when(messageDao).store(message, State.PENDING); // not dup
+    when(messageManager.saveMessage(TYPE, PAYLOAD)).thenThrow(unableToExecuteStatementException); // not dup
 
     assertThatExceptionOfType(UnableToExecuteStatementException.class)
         .isThrownBy(() -> queue.enqueue(TYPE, PAYLOAD));
   }
 
   @Test
-  void enqueue_dupfailure() {
-    when(messageFactory.createMessage(TYPE, PAYLOAD)).thenReturn(message);
-    when(unableToExecuteStatementException.getCause()).thenReturn(sqlIntegrityConstraintViolationException);
-    doThrow(unableToExecuteStatementException).when(messageDao).store(message, State.PENDING);
-    when(message.hash()).thenReturn(HASH);
-    when(messageDao.readByHash(HASH)).thenReturn(Optional.of(lookupMessage));
-
-    assertThat(queue.enqueue(TYPE, PAYLOAD))
-        .isNotEmpty()
-        .contains(lookupMessage);
-  }
-
-  @Test
-  void enqueue_dupfailure_messageNotFound() {
-    when(messageFactory.createMessage(TYPE, PAYLOAD)).thenReturn(message);
-    when(unableToExecuteStatementException.getCause()).thenReturn(sqlIntegrityConstraintViolationException);
-    doThrow(unableToExecuteStatementException).when(messageDao).store(message, State.PENDING);
-    when(message.hash()).thenReturn(HASH);
-    when(messageDao.readByHash(HASH)).thenReturn(Optional.empty());
-
-    assertThatExceptionOfType(IllegalStateException.class)
-        .isThrownBy(() -> queue.enqueue(TYPE, PAYLOAD));
-  }
-
-  @Test
   void getState() {
-    when(messageDao.stateOf(message)).thenReturn(Optional.of(State.ACTIVATING));
+    when(messageManager.getState(message)).thenReturn(Optional.of(State.ACTIVATING));
     assertThat(queue.getState(message)).contains(State.ACTIVATING);
   }
 
   @Test
   void delete() {
     queue.clear(message);
-    verify(messageDao).delete(message);
+    verify(messageManager).clear(message);
   }
 
   @Test
   void deleteAll() {
     queue.clearAll();
-    verify(messageDao).deleteAll();
+    verify(messageManager).clearAll();
   }
 }
