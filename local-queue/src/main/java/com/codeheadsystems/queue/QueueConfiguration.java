@@ -19,16 +19,6 @@ public interface QueueConfiguration {
   }
 
   /**
-   * Worker threads int.
-   *
-   * @return the int
-   */
-  @Value.Default
-  default int workerThreads() {
-    return 5;
-  }
-
-  /**
    * Exception on enqueue fail boolean.
    *
    * @return the boolean

@@ -50,6 +50,11 @@ public class MessageConsumerExecutor implements Managed {
     LOGGER.info("MessageConsumerExecutor({},{},{})", messageDao, executorService, queueRegister);
   }
 
+  /**
+   * Number of free threads in the executor service.
+   *
+   * @return the number of free threads.
+   */
   public int availableThreadCount() {
     return executorService.getMaximumPoolSize() - executorService.getActiveCount();
   }

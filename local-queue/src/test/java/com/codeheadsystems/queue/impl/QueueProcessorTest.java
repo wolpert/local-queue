@@ -75,7 +75,7 @@ class QueueProcessorTest extends BaseMetricTest {
     when(messageConsumerExecutor.availableThreadCount()).thenReturn(0);
 
     processor.processPendingQueue();
-    
+
     verifyNoInteractions(messageDao);
     verifyNoMoreInteractions(messageConsumerExecutor);
   }

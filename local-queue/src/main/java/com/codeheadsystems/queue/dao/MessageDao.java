@@ -56,6 +56,7 @@ public interface MessageDao {
    * For state list, but limit to the number requested.
    *
    * @param state the state
+   * @param limit the max number of results you want.
    * @return the list
    */
   @SqlQuery("select * from QUEUE where STATE = :state order by TIMESTAMP asc limit :limit")

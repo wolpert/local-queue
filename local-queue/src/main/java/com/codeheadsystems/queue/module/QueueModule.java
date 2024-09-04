@@ -97,10 +97,11 @@ public class QueueModule {
   @Named(QUEUE_PROCESSOR_EXECUTOR)
   public ThreadPoolExecutor threadPoolExecutor(final QueueConfigurationFactory factory) {
     final QueueConfiguration configuration = factory.queueConfiguration();
-    return new ThreadPoolExecutor(configuration.queueExecutorMinThreads(),
+    return new ThreadPoolExecutor(
+        configuration.queueExecutorMinThreads(),
         configuration.queueExecutorMaxThreads(),
-        configuration.queueExecutorIdleSeconds(),
-        TimeUnit.SECONDS, new LinkedBlockingQueue<>());
+        configuration.queueExecutorIdleSeconds(), TimeUnit.SECONDS,
+        new LinkedBlockingQueue<>());
   }
 
   /**
