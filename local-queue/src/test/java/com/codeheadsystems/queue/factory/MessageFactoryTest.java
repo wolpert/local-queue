@@ -27,7 +27,6 @@ class MessageFactoryTest {
     when(clock.instant()).thenReturn(java.time.Instant.EPOCH);
     Message message = messageFactory.createMessage("type", "payload");
     assertThat(message).isNotNull();
-    assertThat(message.hash()).isNotNull();
     assertThat(message.timestamp()).isEqualTo(java.time.Instant.EPOCH.toEpochMilli());
     assertThat(message.messageType()).isEqualTo("type");
     assertThat(message.payload()).isEqualTo("payload");
@@ -38,6 +37,22 @@ class MessageFactoryTest {
     when(clock.instant()).thenReturn(java.time.Instant.EPOCH);
     Message message1 = messageFactory.createMessage("type", "payload1");
     Message message2 = messageFactory.createMessage("type", "payload2");
+    assertThat(message1.hash()).isNotEqualTo(message2.hash());
+  }
+
+  @Test
+  void testHashSameForTwoMessages() {
+    when(clock.instant()).thenReturn(java.time.Instant.EPOCH);
+    Message message1 = messageFactory.createMessage("type", "payload");
+    Message message2 = messageFactory.createMessage("type", "payload");
+    assertThat(message1.hash()).isEqualTo(message2.hash());
+  }
+
+  @Test
+  void testHashDifferentForTwoMessageTypes() {
+    when(clock.instant()).thenReturn(java.time.Instant.EPOCH);
+    Message message1 = messageFactory.createMessage("type1", "payload");
+    Message message2 = messageFactory.createMessage("type2", "payload");
     assertThat(message1.hash()).isNotEqualTo(message2.hash());
   }
 

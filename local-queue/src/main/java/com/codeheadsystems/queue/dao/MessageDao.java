@@ -31,7 +31,7 @@ public interface MessageDao {
    * @return the optional
    */
   @SqlQuery("select * from QUEUE where HASH = :hash")
-  Optional<Message> readByHash(@Bind("hash") final String hash);
+  Optional<Message> readByHash(@Bind("hash") final long hash);
 
   /**
    * State of optional.

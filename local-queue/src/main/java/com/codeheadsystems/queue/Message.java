@@ -9,11 +9,11 @@ import org.immutables.value.Value;
 public interface Message {
 
   /**
-   * Hash string for deduping.
+   * Hash string for deduping, used as the primary key.
    *
    * @return the string
    */
-  String hash();
+  long hash();
 
   /**
    * Created instant.

@@ -1,8 +1,13 @@
 package com.codeheadsystems.queue.factory;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import com.codeheadsystems.queue.ImmutableMessage;
 import com.codeheadsystems.queue.Message;
 import com.google.common.base.Charsets;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
 import java.time.Clock;
@@ -19,7 +24,7 @@ public class MessageFactory {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MessageFactory.class);
   private final Clock clock;
-  private final HashFunction hashFunction;
+  private final LoadingCache<String, HashFunction> hashFunctionCache;
 
   /**
    * Instantiates a new Message factory.
@@ -29,8 +34,14 @@ public class MessageFactory {
   @Inject
   public MessageFactory(final Clock clock) {
     this.clock = clock;
-    this.hashFunction = Hashing.murmur3_128();
-    LOGGER.info("MessageFactory({},{})", clock, hashFunction);
+    this.hashFunctionCache = CacheBuilder.newBuilder()
+        .maximumSize(10) // TODO: Set this ina configuration
+        .build(CacheLoader.from(this::generateHashFunction));
+    LOGGER.info("MessageFactory({})", clock);
+  }
+
+  private HashFunction generateHashFunction(final String messageType) {
+    return Hashing.hmacSha512(messageType.getBytes(UTF_8));
   }
 
   /**
@@ -43,11 +54,12 @@ public class MessageFactory {
   public Message createMessage(final String messageType,
                                final String payload) {
     LOGGER.trace("createMessage({},{})", messageType, payload);
+    final HashFunction hashFunction = hashFunctionCache.getUnchecked(messageType);
     return ImmutableMessage.builder()
         .timestamp(clock.instant().toEpochMilli())
         .messageType(messageType)
         .payload(payload)
-        .hash(hashFunction.hashString(payload, Charsets.UTF_8).toString())
+        .hash(hashFunction.hashString(payload, Charsets.UTF_8).asLong())
         .build();
   }
 

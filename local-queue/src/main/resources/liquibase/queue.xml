@@ -23,7 +23,7 @@
 
     <changeSet id="2023-11-07-01" author="wolpert">
         <createTable tableName="QUEUE">
-            <column name="HASH" type="varchar(64)">
+            <column name="HASH" type="bigint">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="TIMESTAMP" type="bigint">
