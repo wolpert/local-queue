@@ -5,10 +5,13 @@ import com.codeheadsystems.metrics.Tags;
 import com.codeheadsystems.queue.Message;
 import com.codeheadsystems.queue.State;
 import com.codeheadsystems.queue.dao.MessageDao;
+import com.codeheadsystems.queue.dao.StateCount;
 import com.codeheadsystems.queue.factory.MessageFactory;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.jdbi.v3.core.statement.UnableToExecuteStatementException;
@@ -119,6 +122,16 @@ public class MessageManager {
   public List<Message> forState(final State state, final int limit) {
     LOGGER.trace("forState({}, {})", state, limit);
     return dao.forState(state, limit);
+  }
+
+  /**
+   * Returns counts of all states.
+   *
+   * @return the map
+   */
+  public Map<State, Long> counts() {
+    LOGGER.trace("counts()");
+    return dao.counts().stream().collect(Collectors.toMap(StateCount::state, StateCount::count));
   }
 
   /**

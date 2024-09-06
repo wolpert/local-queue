@@ -3,6 +3,8 @@ package com.codeheadsystems.queue;
 import com.codeheadsystems.metrics.MetricFactory;
 import com.codeheadsystems.metrics.Metrics;
 import com.codeheadsystems.metrics.Tags;
+import com.codeheadsystems.queue.module.QueueModule;
+import com.codeheadsystems.queue.util.LiquibaseHelper;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import dagger.Component;
 import dagger.Module;
@@ -25,8 +27,6 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import com.codeheadsystems.queue.module.QueueModule;
-import com.codeheadsystems.queue.util.LiquibaseHelper;
 
 /**
  * This test pretends to be a full dropwizard application.

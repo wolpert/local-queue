@@ -120,6 +120,28 @@ class MessageDaoTest {
   }
 
   @Test
+  void testCounts_empty() {
+    final List<StateCount> counts = messageDao.counts();
+    assertThat(counts)
+        .hasSize(0);
+  }
+
+  @Test
+  void testCounts() {
+    when(clock.instant()).thenReturn(Instant.ofEpochMilli(100));
+    messageDao.store(messageFactory.createMessage("type", "payload:1"), State.ACTIVATING);
+    messageDao.store(messageFactory.createMessage("type", "payload:2"), State.PENDING);
+    messageDao.store(messageFactory.createMessage("type", "payload:3"), State.ACTIVATING);
+    final List<StateCount> counts = messageDao.counts();
+    assertThat(counts)
+        .hasSize(2)
+        .containsExactlyInAnyOrder(
+            ImmutableStateCount.builder().state(State.ACTIVATING).count(2).build(),
+            ImmutableStateCount.builder().state(State.PENDING).count(1).build()
+        );
+  }
+
+  @Test
   void testListByStateWithLimit() {
     when(clock.instant()).thenReturn(Instant.ofEpochMilli(100));
     final Message message1 = messageFactory.createMessage("type", "payload:1");

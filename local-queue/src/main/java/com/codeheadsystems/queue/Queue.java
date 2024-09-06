@@ -1,5 +1,6 @@
 package com.codeheadsystems.queue;
 
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -24,6 +25,13 @@ public interface Queue {
    * @return the state if it is found.
    */
   Optional<State> getState(final Message message);
+
+  /**
+   * Provides the list of messages enqueued within the system for each state.
+   *
+   * @return map list.
+   */
+  Map<State, Long> getMessageStateCounts();
 
   /**
    * Clear all.

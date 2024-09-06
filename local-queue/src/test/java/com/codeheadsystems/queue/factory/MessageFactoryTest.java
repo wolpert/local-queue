@@ -3,13 +3,13 @@ package com.codeheadsystems.queue.factory;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
+import com.codeheadsystems.queue.Message;
 import java.time.Clock;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import com.codeheadsystems.queue.Message;
 
 @ExtendWith(MockitoExtension.class)
 class MessageFactoryTest {

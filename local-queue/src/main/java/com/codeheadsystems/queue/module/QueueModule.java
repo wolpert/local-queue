@@ -5,6 +5,7 @@ import com.codeheadsystems.queue.MessageConsumer;
 import com.codeheadsystems.queue.Queue;
 import com.codeheadsystems.queue.QueueConfiguration;
 import com.codeheadsystems.queue.dao.MessageDao;
+import com.codeheadsystems.queue.dao.StateCount;
 import com.codeheadsystems.queue.factory.QueueConfigurationFactory;
 import com.codeheadsystems.queue.impl.MessageConsumerExecutor;
 import com.codeheadsystems.queue.impl.QueueImpl;
@@ -70,6 +71,7 @@ public class QueueModule {
   @Provides
   public MessageDao messageDao(final Jdbi jdbi) {
     jdbi.getConfig(JdbiImmutables.class)
+        .registerImmutable(StateCount.class)
         .registerImmutable(Message.class);
     return jdbi.onDemand(MessageDao.class);
   }

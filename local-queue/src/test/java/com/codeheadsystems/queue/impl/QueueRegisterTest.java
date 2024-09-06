@@ -2,13 +2,13 @@ package com.codeheadsystems.queue.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.codeheadsystems.queue.Message;
+import com.codeheadsystems.queue.MessageConsumer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import com.codeheadsystems.queue.Message;
-import com.codeheadsystems.queue.MessageConsumer;
 
 @ExtendWith(MockitoExtension.class)
 class QueueRegisterTest {

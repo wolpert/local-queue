@@ -9,6 +9,10 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import com.codeheadsystems.metrics.test.BaseMetricTest;
+import com.codeheadsystems.queue.Message;
+import com.codeheadsystems.queue.QueueConfiguration;
+import com.codeheadsystems.queue.State;
+import com.codeheadsystems.queue.factory.QueueConfigurationFactory;
 import com.codeheadsystems.queue.manager.MessageManager;
 import java.util.List;
 import java.util.Optional;
@@ -20,11 +24,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import com.codeheadsystems.queue.Message;
-import com.codeheadsystems.queue.QueueConfiguration;
-import com.codeheadsystems.queue.State;
-import com.codeheadsystems.queue.dao.MessageDao;
-import com.codeheadsystems.queue.factory.QueueConfigurationFactory;
 
 @ExtendWith(MockitoExtension.class)
 class QueueProcessorTest extends BaseMetricTest {
@@ -61,7 +60,7 @@ class QueueProcessorTest extends BaseMetricTest {
   @Test
   void testProcessingPendingQueue() {
     when(messageConsumerExecutor.availableThreadCount()).thenReturn(1);
-    when(messageManager.forState(State.PENDING,1)).thenReturn(List.of(message));
+    when(messageManager.forState(State.PENDING, 1)).thenReturn(List.of(message));
 
     processor.processPendingQueue();
 

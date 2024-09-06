@@ -8,6 +8,7 @@ import com.codeheadsystems.queue.QueueConfiguration;
 import com.codeheadsystems.queue.State;
 import com.codeheadsystems.queue.factory.QueueConfigurationFactory;
 import com.codeheadsystems.queue.manager.MessageManager;
+import java.util.Map;
 import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -62,6 +63,11 @@ public class QueueImpl implements Queue {
   public Optional<State> getState(final Message message) {
     LOGGER.trace("getState({})", message);
     return messageManager.getState(message);
+  }
+
+  @Override
+  public Map<State, Long> getMessageStateCounts() {
+    return messageManager.counts();
   }
 
   @Override

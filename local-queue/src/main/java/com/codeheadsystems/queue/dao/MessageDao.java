@@ -43,6 +43,14 @@ public interface MessageDao {
   Optional<State> stateOf(@BindPojo final Message message);
 
   /**
+   * Returns back the count of all messages in the queue.
+   *
+   * @return the list
+   */
+  @SqlQuery("select STATE, count(*) as COUNT from QUEUE group by STATE")
+  List<StateCount> counts();
+
+  /**
    * For state list.
    *
    * @param state the state
