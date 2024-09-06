@@ -83,7 +83,7 @@ public class QueueProcessor implements Managed {
       return;
     }
     metrics.time("QueueProcessor.processPendingQueue", () -> {
-      messageManager.forState(State.PENDING, messageCount).forEach(message -> {
+      messageManager.getPendingMessages(messageCount).forEach(message -> {
         LOGGER.trace("Processing message {}", message);
         messageManager.setActivating(message);
         messageConsumerExecutor.enqueue(message);

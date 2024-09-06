@@ -60,7 +60,7 @@ class QueueProcessorTest extends BaseMetricTest {
   @Test
   void testProcessingPendingQueue() {
     when(messageConsumerExecutor.availableThreadCount()).thenReturn(1);
-    when(messageManager.forState(State.PENDING, 1)).thenReturn(List.of(message));
+    when(messageManager.getPendingMessages(1)).thenReturn(List.of(message));
 
     processor.processPendingQueue();
 

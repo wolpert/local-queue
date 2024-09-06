@@ -102,26 +102,14 @@ public class MessageManager {
   }
 
   /**
-   * For state list.
+   * Gets pending messages, up to the limit. Oldest first.
    *
-   * @param state the state
-   * @return the list
+   * @param limit count of messages to get.
+   * @return the list.
    */
-  public List<Message> forState(final State state) {
-    LOGGER.trace("forState({})", state);
-    return dao.forState(state);
-  }
-
-  /**
-   * For state list.
-   *
-   * @param state the state
-   * @param limit the limit
-   * @return the list
-   */
-  public List<Message> forState(final State state, final int limit) {
-    LOGGER.trace("forState({}, {})", state, limit);
-    return dao.forState(state, limit);
+  public List<Message> getPendingMessages(final int limit) {
+    LOGGER.trace("getPendingMessages({})", limit);
+    return dao.forState(State.PENDING, limit);
   }
 
   /**
