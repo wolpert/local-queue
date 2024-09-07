@@ -32,6 +32,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class MessageDaoTest {
 
+  private static final String TYPE = "type";
+  private static final String PAYLOAD = "payload:0";
+  private static final String PAYLOAD1 = "payload:1";
+  private static final String PAYLOAD2 = "payload:2";
+  private static final String PAYLOAD3 = "payload:3";
+  private static final String PAYLOAD4 = "payload:4";
+  private static final String PAYLOAD5 = "payload:5";
   @Mock private Clock clock;
 
   private MessageFactory messageFactory;
@@ -42,7 +49,7 @@ class MessageDaoTest {
   @Test
   void testRoundTrip() {
     when(clock.instant()).thenReturn(EPOCH);
-    final Message message = messageFactory.createMessage("type", "payload");
+    final Message message = messageFactory.createMessage(TYPE, PAYLOAD);
     messageDao.store(message, State.ACTIVATING);
     final Optional<Message> result = messageDao.readByHash(message.hash());
     assertThat(result)
@@ -54,9 +61,19 @@ class MessageDaoTest {
   }
 
   @Test
+  void testSaveDupsProcess() {
+    when(clock.instant()).thenReturn(EPOCH);
+    final Message message = messageFactory.createMessage(TYPE, PAYLOAD);
+    messageDao.store(message, State.PENDING);
+    assertThatExceptionOfType(UnableToExecuteStatementException.class)
+        .isThrownBy(() -> messageDao.store(message, State.PENDING))
+        .withCauseInstanceOf(SQLIntegrityConstraintViolationException.class);
+  }
+
+  @Test
   void testHashLookup() {
     when(clock.instant()).thenReturn(EPOCH);
-    final Message message = messageFactory.createMessage("type", "payload");
+    final Message message = messageFactory.createMessage(TYPE, PAYLOAD);
     messageDao.store(message, State.ACTIVATING);
     assertThat(messageDao.readByHash(message.hash()))
         .isNotEmpty()
@@ -66,7 +83,7 @@ class MessageDaoTest {
   @Test
   void testUpdateState() {
     when(clock.instant()).thenReturn(EPOCH);
-    final Message message = messageFactory.createMessage("type", "payload");
+    final Message message = messageFactory.createMessage(TYPE, PAYLOAD);
     messageDao.store(message, State.ACTIVATING);
     assertThat(messageDao.forState(State.ACTIVATING)).containsExactly(message);
     assertThat(messageDao.stateOf(message)).contains(State.ACTIVATING);
@@ -79,9 +96,9 @@ class MessageDaoTest {
   @Test
   void testDupPayload() {
     when(clock.instant()).thenReturn(Instant.ofEpochMilli(100));
-    final Message message1 = messageFactory.createMessage("type", "payload");
+    final Message message1 = messageFactory.createMessage(TYPE, PAYLOAD);
     when(clock.instant()).thenReturn(Instant.ofEpochMilli(101));
-    final Message message2 = messageFactory.createMessage("type", "payload");
+    final Message message2 = messageFactory.createMessage(TYPE, PAYLOAD);
     messageDao.store(message1, State.ACTIVATING);
     assertThatExceptionOfType(UnableToExecuteStatementException.class)
         .isThrownBy(() -> messageDao.store(message2, State.ACTIVATING))
@@ -91,9 +108,9 @@ class MessageDaoTest {
   @Test
   void testDeleteAll() {
     when(clock.instant()).thenReturn(Instant.ofEpochMilli(100));
-    final Message message1 = messageFactory.createMessage("type", "payload1");
+    final Message message1 = messageFactory.createMessage(TYPE, PAYLOAD1);
     when(clock.instant()).thenReturn(Instant.ofEpochMilli(101));
-    final Message message2 = messageFactory.createMessage("type", "payload2");
+    final Message message2 = messageFactory.createMessage(TYPE, PAYLOAD2);
     messageDao.store(message1, State.ACTIVATING);
     messageDao.store(message2, State.ACTIVATING);
     assertThat(messageDao.forState(State.ACTIVATING)).hasSize(2).containsExactly(message1, message2);
@@ -105,11 +122,11 @@ class MessageDaoTest {
   @Test
   void testListByState() {
     when(clock.instant()).thenReturn(Instant.ofEpochMilli(100));
-    final Message message1 = messageFactory.createMessage("type", "payload:1");
+    final Message message1 = messageFactory.createMessage(TYPE, PAYLOAD3);
     when(clock.instant()).thenReturn(Instant.ofEpochMilli(110));
-    final Message message2 = messageFactory.createMessage("type", "payload:2");
+    final Message message2 = messageFactory.createMessage(TYPE, PAYLOAD4);
     when(clock.instant()).thenReturn(Instant.ofEpochMilli(120));
-    final Message message3 = messageFactory.createMessage("type", "payload:3");
+    final Message message3 = messageFactory.createMessage(TYPE, PAYLOAD5);
     messageDao.store(message1, State.ACTIVATING);
     messageDao.store(message2, State.PENDING);
     messageDao.store(message3, State.ACTIVATING);
@@ -129,9 +146,9 @@ class MessageDaoTest {
   @Test
   void testCounts() {
     when(clock.instant()).thenReturn(Instant.ofEpochMilli(100));
-    messageDao.store(messageFactory.createMessage("type", "payload:1"), State.ACTIVATING);
-    messageDao.store(messageFactory.createMessage("type", "payload:2"), State.PENDING);
-    messageDao.store(messageFactory.createMessage("type", "payload:3"), State.ACTIVATING);
+    messageDao.store(messageFactory.createMessage(TYPE, PAYLOAD3), State.ACTIVATING);
+    messageDao.store(messageFactory.createMessage(TYPE, PAYLOAD4), State.PENDING);
+    messageDao.store(messageFactory.createMessage(TYPE, PAYLOAD5), State.ACTIVATING);
     final List<StateCount> counts = messageDao.counts();
     assertThat(counts)
         .hasSize(2)
@@ -144,11 +161,11 @@ class MessageDaoTest {
   @Test
   void testListByStateWithLimit() {
     when(clock.instant()).thenReturn(Instant.ofEpochMilli(100));
-    final Message message1 = messageFactory.createMessage("type", "payload:1");
+    final Message message1 = messageFactory.createMessage(TYPE, PAYLOAD3);
     when(clock.instant()).thenReturn(Instant.ofEpochMilli(110));
-    final Message message2 = messageFactory.createMessage("type", "payload:2");
+    final Message message2 = messageFactory.createMessage(TYPE, PAYLOAD4);
     when(clock.instant()).thenReturn(Instant.ofEpochMilli(120));
-    final Message message3 = messageFactory.createMessage("type", "payload:3");
+    final Message message3 = messageFactory.createMessage(TYPE, PAYLOAD5);
     messageDao.store(message1, State.ACTIVATING);
     messageDao.store(message2, State.PENDING);
     messageDao.store(message3, State.ACTIVATING);
@@ -165,11 +182,11 @@ class MessageDaoTest {
   @Test
   void testUpdateAllToPending() {
     when(clock.instant()).thenReturn(Instant.ofEpochMilli(100));
-    final Message message1 = messageFactory.createMessage("type", "payload:1");
+    final Message message1 = messageFactory.createMessage(TYPE, PAYLOAD3);
     when(clock.instant()).thenReturn(Instant.ofEpochMilli(110));
-    final Message message2 = messageFactory.createMessage("type", "payload:2");
+    final Message message2 = messageFactory.createMessage(TYPE, PAYLOAD4);
     when(clock.instant()).thenReturn(Instant.ofEpochMilli(120));
-    final Message message3 = messageFactory.createMessage("type", "payload:3");
+    final Message message3 = messageFactory.createMessage(TYPE, PAYLOAD5);
     messageDao.store(message1, State.ACTIVATING);
     messageDao.store(message2, State.PENDING);
     messageDao.store(message3, State.ACTIVATING);
