@@ -1,18 +1,16 @@
 package com.codeheadsystems.queue.impl;
 
-import static com.codeheadsystems.queue.module.QueueModule.QUEUE_PROCESSOR_SCHEDULER;
-
 import com.codeheadsystems.metrics.Metrics;
 import com.codeheadsystems.queue.QueueConfiguration;
-import com.codeheadsystems.queue.State;
 import com.codeheadsystems.queue.factory.QueueConfigurationFactory;
 import com.codeheadsystems.queue.manager.MessageManager;
+import com.google.common.annotations.VisibleForTesting;
 import io.dropwizard.lifecycle.Managed;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,14 +35,25 @@ public class QueueProcessor implements Managed {
    * @param messageManager            the messageManager
    * @param queueConfigurationFactory the queue configuration factory
    * @param messageConsumerExecutor   the message consumer executor
-   * @param scheduledExecutorService  the scheduled executor service
    * @param metrics                   the metrics
    */
   @Inject
   public QueueProcessor(final MessageManager messageManager,
                         final QueueConfigurationFactory queueConfigurationFactory,
                         final MessageConsumerExecutor messageConsumerExecutor,
-                        @Named(QUEUE_PROCESSOR_SCHEDULER) final ScheduledExecutorService scheduledExecutorService,
+                        final Metrics metrics) {
+    this(messageManager,
+        queueConfigurationFactory,
+        messageConsumerExecutor,
+        Executors.newScheduledThreadPool(1),
+        metrics);
+  }
+
+  @VisibleForTesting
+  QueueProcessor(final MessageManager messageManager,
+                        final QueueConfigurationFactory queueConfigurationFactory,
+                        final MessageConsumerExecutor messageConsumerExecutor,
+                        final ScheduledExecutorService scheduledExecutorService,
                         final Metrics metrics) {
     this.messageManager = messageManager;
     this.queueConfiguration = queueConfigurationFactory.queueConfiguration();

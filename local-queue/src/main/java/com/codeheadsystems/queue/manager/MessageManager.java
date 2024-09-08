@@ -19,7 +19,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The type Message manager.
+ * The Message manager. This links the DAO with the model. Right now they
+ * are tightly coupled, but by only having the DAO used here, we enforce
+ * that should it need to change we can.
  */
 @Singleton
 public class MessageManager {

@@ -4,6 +4,8 @@ import com.codeheadsystems.queue.Message;
 import com.codeheadsystems.queue.State;
 import java.util.List;
 import java.util.Optional;
+import org.jdbi.v3.core.Jdbi;
+import org.jdbi.v3.core.mapper.immutables.JdbiImmutables;
 import org.jdbi.v3.sqlobject.customizer.Bind;
 import org.jdbi.v3.sqlobject.customizer.BindPojo;
 import org.jdbi.v3.sqlobject.statement.SqlQuery;
@@ -13,6 +15,20 @@ import org.jdbi.v3.sqlobject.statement.SqlUpdate;
  * The interface Message dao.
  */
 public interface MessageDao {
+
+  /**
+   * Instance message dao. In theory you can call this multiple times,
+   * but it is recommended you only call it once.
+   *
+   * @param jdbi the jdbi
+   * @return the message dao
+   */
+  static MessageDao instance(final Jdbi jdbi) {
+    jdbi.getConfig(JdbiImmutables.class)
+        .registerImmutable(StateCount.class)
+        .registerImmutable(Message.class);
+    return jdbi.onDemand(MessageDao.class);
+  }
 
   /**
    * Store.

@@ -1,17 +1,17 @@
 package com.codeheadsystems.queue.impl;
 
-import static com.codeheadsystems.queue.module.QueueModule.QUEUE_PROCESSOR_EXECUTOR;
-
 import com.codeheadsystems.metrics.Metrics;
 import com.codeheadsystems.metrics.Tags;
 import com.codeheadsystems.queue.Message;
 import com.codeheadsystems.queue.MessageConsumer;
+import com.codeheadsystems.queue.QueueConfiguration;
+import com.codeheadsystems.queue.factory.QueueConfigurationFactory;
 import com.codeheadsystems.queue.manager.MessageManager;
 import io.dropwizard.lifecycle.Managed;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,17 +31,22 @@ public class MessageConsumerExecutor implements Managed {
   /**
    * Instantiates a new Message consumer executor.
    *
-   * @param executorService the executor service
-   * @param messageManager  the message manager
-   * @param queueRegister   the queue register
-   * @param metrics         the metrics
+   * @param queueConfigurationFactory the configuration.
+   * @param messageManager            the message manager
+   * @param queueRegister             the queue register
+   * @param metrics                   the metrics
    */
   @Inject
-  public MessageConsumerExecutor(@Named(QUEUE_PROCESSOR_EXECUTOR) final ThreadPoolExecutor executorService,
+  public MessageConsumerExecutor(final QueueConfigurationFactory queueConfigurationFactory,
                                  final MessageManager messageManager,
                                  final QueueRegister queueRegister,
                                  final Metrics metrics) {
-    this.executorService = executorService;
+    final QueueConfiguration configuration = queueConfigurationFactory.queueConfiguration();
+    this.executorService = new ThreadPoolExecutor(
+        configuration.queueExecutorMinThreads(),
+        configuration.queueExecutorMaxThreads(),
+        configuration.queueExecutorIdleSeconds(), TimeUnit.SECONDS,
+        new LinkedBlockingQueue<>());
     this.messageManager = messageManager;
     this.queueRegister = queueRegister;
     this.metrics = metrics;
@@ -86,7 +91,7 @@ public class MessageConsumerExecutor implements Managed {
         return null;
       });
     } catch (final Throwable t) {
-      // TODO: There is no dead letter queue... yet
+      // There is no dead letter queue... an no poison pill impact. We delete either way.
       LOGGER.error("Error processing message: {}", message, t); // do not die
     } finally {
       messageManager.clear(message);
