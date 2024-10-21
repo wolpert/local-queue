@@ -11,12 +11,12 @@ dropwizard4 = "4.0.9"
 guava = "33.3.1-jre"
 hsqldb = '2.7.3'
 immutables = '2.10.1'
-jdbi = '3.45.4'
+jdbi = '3.46.0'
 junit-jupiter = "5.11.2"
 liquibase = '4.29.2'
-logback = '1.5.10'
-micrometer = '1.13.5'
-mokito = '5.14.1'
+logback = '1.5.11'
+micrometer = '1.13.6'
+mokito = '5.14.2'
 slf4j = '2.0.16'
 
 [libraries]
