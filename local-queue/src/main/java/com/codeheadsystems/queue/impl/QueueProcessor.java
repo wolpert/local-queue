@@ -51,10 +51,10 @@ public class QueueProcessor implements Managed {
 
   @VisibleForTesting
   QueueProcessor(final MessageManager messageManager,
-                        final QueueConfigurationFactory queueConfigurationFactory,
-                        final MessageConsumerExecutor messageConsumerExecutor,
-                        final ScheduledExecutorService scheduledExecutorService,
-                        final Metrics metrics) {
+                 final QueueConfigurationFactory queueConfigurationFactory,
+                 final MessageConsumerExecutor messageConsumerExecutor,
+                 final ScheduledExecutorService scheduledExecutorService,
+                 final Metrics metrics) {
     this.messageManager = messageManager;
     this.queueConfiguration = queueConfigurationFactory.queueConfiguration();
     this.messageConsumerExecutor = messageConsumerExecutor;
