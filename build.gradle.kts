@@ -10,6 +10,7 @@ nexusPublishing {
 }
 allprojects {
     group = "com.codeheadsystems"
-    version = "1.0.1-SNAPSHOT"
+    version = "1.0.1"
+    //version = "1.0.1-SNAPSHOT"
 }
 // gradle clean build test publishToSonatype closeAndReleaseSonatypeStagingRepository
