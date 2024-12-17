@@ -8,14 +8,14 @@ codehead-test = "1.0.11"
 codehead-metrics = "2.0.9"
 dagger = "2.53.1"
 dropwizard4 = "4.0.11"
-guava = "33.3.1-jre"
+guava = "33.4.0-jre"
 hsqldb = '2.7.4'
 immutables = '2.10.1'
 jdbi = '3.47.0'
-junit-jupiter = "5.11.3"
+junit-jupiter = "5.11.4"
 liquibase = '4.30.0'
 logback = '1.5.12'
-micrometer = '1.14.1'
+micrometer = '1.14.2'
 mokito = '5.14.2'
 slf4j = '2.0.16'
 
