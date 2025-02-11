@@ -15,7 +15,7 @@ jdbi = '3.47.0'
 junit-jupiter = "5.11.4"
 liquibase = '4.31.0'
 logback = '1.5.16'
-micrometer = '1.14.3'
+micrometer = '1.14.4'
 mokito = '5.15.2'
 slf4j = '2.0.16'
 
