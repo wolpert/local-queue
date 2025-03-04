@@ -1,3 +1,6 @@
+# NOTE: ARCHIVED AND THIS IS MOVED TO https://github.com/wolpert/libraries
+
+
 # Redux
 
 This project is almost a redo of the local-queue module within the svarm project.
