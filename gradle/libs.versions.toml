@@ -4,7 +4,7 @@
 [versions]
 assertj = "3.27.3"
 c3p0 = "0.10.2"
-codehead-test = "1.0.11"
+codehead-test = "3.0.0"
 codehead-metrics = "2.0.12"
 dagger = "2.55"
 dropwizard4 = "4.0.12"
@@ -14,10 +14,10 @@ immutables = '2.10.1'
 jdbi = '3.48.0'
 junit-jupiter = "5.12.0"
 liquibase = '4.31.1'
-logback = '1.5.16'
+logback = '1.5.17'
 micrometer = '1.14.4'
-mokito = '5.15.2'
-slf4j = '2.0.16'
+mokito = '5.16.0'
+slf4j = '2.0.17'
 
 [libraries]
 assertj = { module = "org.assertj:assertj-core", version.ref = "assertj" }
